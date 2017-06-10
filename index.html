@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>CSV Visualization</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600">
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <header class="page-header">
+        <h1>D3.js CSV Visualization </h1>
+        <p class="text-small">Interactive sunburst visualization of .csv files.</p>
+    </header>
+
+    <div id="container">
+        <div id="sunburst"></div>
+        <div id="combos">
+            <h2>File:</h2>
+            <input id="fileUpload" type="file"/>
+            <hr />
+            <h2>Priority:</h2>
+        </div>
+    </div>
+</body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://underscorejs.org/underscore-min.js"></script>
+<script type="text/javascript" src="vis.js" /></script>
+
+</html>

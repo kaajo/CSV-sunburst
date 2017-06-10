@@ -1,0 +1,42 @@
+body {
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  padding-top: 10px;
+  padding-bottom: 100px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+html {
+  overflow-y: scroll;
+}
+h1 {
+  color: steelblue;
+  font-weight: 800;
+  font-size: 1.7em;
+}
+h2 {
+  color: steelblue;
+  font-size: 1.3em;
+  padding-bottom: 10px;
+}
+label {
+  line-height:25px
+}
+select {
+  display: block;
+  padding-top:4px;
+  background-color: lightgray;
+}
+#container {
+  overflow: hidden;
+  position: relative;
+}
+#sunburst, #combos {
+  float: left;
+}
+pre {
+  height: 300px;
+  font-size: 9px;
+  overflow-y: scroll;
+}
