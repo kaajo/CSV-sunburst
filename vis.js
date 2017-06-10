@@ -1,3 +1,10 @@
+// Check for the various File API support.
+if (window.File && window.FileReader && window.FileList && window.Blob) {
+    // Great success! All the File APIs are supported.
+} else {
+    alert('The File APIs are not fully supported in this browser.');
+}
+
 var width = 960,
     height = 700,
     radius = (Math.min(width, height) / 2) - 10;
@@ -17,6 +24,8 @@ var minDx = 0.0;
 
 var priorityOfAttr = [];
 
+var fileData;
+
 var createdMenu = false;
 
 var arc = d3.svg.arc()
@@ -31,15 +40,13 @@ var svg = d3.select("#sunburst").append("svg")
     .append("g")
     .attr("transform", "translate(" + width / 2 + "," + (height / 2) + ")");
 
-createVisualization([]);
-
+document.getElementById('fileUpload').value = "";
 document.getElementById('fileUpload').addEventListener('change', onFileChange, false);
 
 //functions
 
 function addCombobox(name, option) {
-    if (name.length == 0)
-    {
+    if (name.length == 0) {
         name = "<noname>";
     }
 
@@ -65,7 +72,7 @@ function addCombobox(name, option) {
 function createMenu(csv_data) {
     if (!createdMenu) {
         Object.keys(csv_data[0]).forEach(function (key) {
-            addCombobox(key,_.range(Object.keys(csv_data[0]).length));
+            addCombobox(key, _.range(Object.keys(csv_data[0]).length));
         });
         createdMenu = true;
     }
@@ -120,7 +127,7 @@ function textForDepth(d) {
         return d.name;
     }
     else {
-        return priorityOfAttr[d.depth - 1].id + ": " + d.name + " (" + + d.value + "/" + (d.value/d.parent.value*100.0).toFixed(2) + "%)"
+        return priorityOfAttr[d.depth - 1].id + ": " + d.name + " (" + + d.value + "/" + (d.value / d.parent.value * 100.0).toFixed(2) + "%)"
     }
 }
 
@@ -131,42 +138,41 @@ function createNestingFunction(propertyName) {
 }
 
 function createVisualization(orderedkeys) {
-    d3.csv(d3.select('#fileUpload')[0][0].files[0].name, function (csv_data) {
+    var fd = d3.csv.parse(fileData);
 
-        minDx = 1.0 / (csv_data.length - 1);
+    minDx = 1.0 / (fd.length - 1);
 
-        createMenu(csv_data);
+    createMenu(fd);
 
-        var nested_data = d3.nest();
+    var nested_data = d3.nest();
 
-        for (var i = 0; i < orderedkeys.length; i++) {
-            nested_data = nested_data.key(createNestingFunction(orderedkeys[i]));
-        }
+    for (var i = 0; i < orderedkeys.length; i++) {
+        nested_data = nested_data.key(createNestingFunction(orderedkeys[i]));
+    }
 
-        nested_data = nested_data
-            .entries(csv_data);
+    nested_data = nested_data
+        .entries(fd);
 
-        replaceInJSONNode(nested_data, "key", "name");
-        replaceInJSONNode(nested_data, "values", "children");
-        
-        var root = {};
-        root.name = "graph";
-        root.children = nested_data;
+    replaceInJSONNode(nested_data, "key", "name");
+    replaceInJSONNode(nested_data, "values", "children");
 
-        var nodes = partition.nodes(root)
-            .filter(function (d) {
-                return (d.dx > minDx);
-            });
+    var root = {};
+    root.name = "graph";
+    root.children = nested_data;
 
-        svg.selectAll("path")
-            .data(nodes)
-            .enter().append("path")
-            .attr("d", arc)
-            .style("fill", function (d) { return color((d.children ? d : d.parent).name); })
-            .on("click", click)
-            .append("title")
-            .text(textForDepth);
-    });
+    var nodes = partition.nodes(root)
+        .filter(function (d) {
+            return (d.dx > minDx);
+        });
+
+    svg.selectAll("path")
+        .data(nodes)
+        .enter().append("path")
+        .attr("d", arc)
+        .style("fill", function (d) { return color((d.children ? d : d.parent).name); })
+        .on("click", click)
+        .append("title")
+        .text(textForDepth);
 }
 
 function removeVisualization() {
@@ -189,7 +195,17 @@ function onChange() {
     createVisualization(priorityOfAttr.map(function (a) { return a.id }));
 }
 
-function onFileChange() {
-    removeMenu();
-    onChange();
+function onFileChange(fileContent) {
+
+    var file = fileContent.target.files[0];
+
+    var reader = new FileReader();
+
+    reader.onload = function (event) {
+        fileData = this.result;
+        removeMenu();
+        onChange();
+    }
+
+    reader.readAsText(file);
 }
