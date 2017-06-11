@@ -5,6 +5,21 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
     alert('The File APIs are not fully supported in this browser.');
 }
 
+$(function () {
+    $("#used").sortable({
+        pullPlaceholder: true,
+        connectWith: ["#unused"],
+        update: function (event, ui) {
+            onChange();
+        }
+    });
+
+    $("#unused").sortable({
+        pullPlaceholder: true,
+        connectWith: ["#used"]
+    });
+});
+
 var width = 960,
     height = 700,
     radius = (Math.min(width, height) / 2) - 10;
@@ -45,43 +60,28 @@ document.getElementById('fileUpload').addEventListener('change', onFileChange, f
 
 //functions
 
-function addCombobox(name, option) {
+function addAttribList(name) {
     if (name.length == 0) {
         name = "<noname>";
     }
 
-    var label = d3.select("#combos")
-        .append('label')
-        .attr('for', name)
-        .text(name);
-
-    var select = d3.select("#combos")
-        .append('select')
-        .attr('id', name)
-        .on('change', onChange);
-
-    var options = select
-        .selectAll('option')
-        .attr("name", options)
-        .data(option).enter()
-        .append('option')
-        .text(function (d) { return d; });
-
+    var li = d3.select("#unused")
+    .append("li")
+    .attr("class","attribute")
+    .text(name);
 }
 
 function createMenu(csv_data) {
     if (!createdMenu) {
         Object.keys(csv_data[0]).forEach(function (key) {
-            addCombobox(key, _.range(Object.keys(csv_data[0]).length));
+            addAttribList(key);
         });
         createdMenu = true;
     }
 }
 
 function removeMenu() {
-
-    d3.select("#combos").selectAll("select").remove("*");
-    d3.select("#combos").selectAll("label").remove("*");
+    d3.select("#menu").selectAll("li").remove("attribute");
     createdMenu = false;
 }
 
@@ -127,7 +127,7 @@ function textForDepth(d) {
         return d.name;
     }
     else {
-        return priorityOfAttr[d.depth - 1].id + ": " + d.name + " (" + + d.value + "/" + (d.value / d.parent.value * 100.0).toFixed(2) + "%)"
+        return priorityOfAttr[d.depth - 1].textContent + ": " + d.name + " (" + + d.value + "/" + (d.value / d.parent.value * 100.0).toFixed(2) + "%)"
     }
 }
 
@@ -180,19 +180,9 @@ function removeVisualization() {
 }
 
 function onChange() {
-    var elems = d3.select("#combos").selectAll("select");
-
-    priorityOfAttr = [];
-
-    elems[0].forEach(function (element) {
-        if (element.selectedIndex > 0) {
-            priorityOfAttr.push(element);
-        }
-    });
-    priorityOfAttr.sort(function (a, b) { return a.selectedIndex > b.selectedIndex; })
-
+    priorityOfAttr = d3.select("#used").selectAll("li")[0];
     removeVisualization();
-    createVisualization(priorityOfAttr.map(function (a) { return a.id }));
+    createVisualization(priorityOfAttr.map(function (a) { return a.textContent; }));
 }
 
 function onFileChange(fileContent) {
